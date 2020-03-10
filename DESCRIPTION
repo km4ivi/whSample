@@ -4,8 +4,7 @@ Title: Utilities for Sampling
 Version: 0.1.0
 Author: Paul West
 Maintainer: Paul West <fp8049@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Interteractive tools for generating random samples
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
@@ -14,3 +13,4 @@ Imports:
     magrittr,
     openxlsx,
     tools
+RoxygenNote: 7.0.2
