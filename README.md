@@ -75,7 +75,7 @@ preferred sampling type.
 You can install the latest version of whSample from the R console with:
 
 ``` r
-devtools::install_github("km4ivi/R-whSample")
+devtools::install_github("km4ivi/whSample")
 ```
 
 ### Other necessary packages
