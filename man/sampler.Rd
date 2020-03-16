@@ -4,11 +4,20 @@
 \alias{sampler}
 \title{Generate Sample Lists from Excel or CSV Files}
 \usage{
-sampler()
+sampler(ci = 0.95, me = 0.07, p = 0.5, backups = 5, seed = NULL)
 }
 \value{
-Writes samples to an Excel workbook
+Writes samples to an Excel workbook and generates a report summary.
 }
 \description{
 \code{sampler} generates Simple Random or Stratified samples
+}
+\section{Details}{
+
+\code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
+}
+
+\examples{
+sampler()
+sampler(backups=0, p=0.6)
 }
