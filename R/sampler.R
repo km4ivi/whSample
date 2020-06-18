@@ -16,19 +16,33 @@
 #' sampler(backups=0, p=0.6)
 #' @export
 #'
-sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
+
+sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
+
+  # set up the Excel style
+  headerStyle <- createStyle(halign="center", valign="center",
+                             borderColour="black", textDecoration="bold",
+                             border="TopBottomLeftRight", wrapText=F,
+                             borderStyle="thin", fgFill="#e7e6e6") # lt gray
 
   ifelse(!is.numeric(seed), rns <- as.integer(Sys.time()), rns <- seed)
   set.seed(rns)
 
-  wb <- createWorkbook()
+  # wb <- createWorkbook()
+  # dataName <- file.choose()
 
+  # choose the source file
   dataName <- file.choose()
 
+  # save the path to it so we can write to the same place
+  wb.path <- dirname(dataName)
+
+  wb <- loadWorkbook(dataName)
+
   if(file_ext(dataName)=='xlsx') {
-    data <- read.xlsx(dataName)
+    data <- read.xlsx(wb)
   } else if(file_ext(dataName)=='csv') {
-    data <- fread(dataName)
+    data <- fread(wb)
   } else paste("Not a valid data file")
 
   N <- nrow(data)
