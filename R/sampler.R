@@ -9,6 +9,7 @@
 #' @import openxlsx
 #' @importFrom data.table fread
 #' @import dplyr
+#' @import glue
 #' @section Details:
 #' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 #' @examples
@@ -47,7 +48,6 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
 
   N <- nrow(data)
 
- # sampleSize <- whSample::ssize(nrow(data))
   sampleSize <- whSample::ssize(N, ci, me, p)
 
   sampleType <- utils::menu(c("Simple Random Sample",
@@ -61,12 +61,24 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
                            "Stratified Random Sample",
                            "Tabbed Stratified Sample")
 
+  # create a new output workbook
+  new.wb <- createWorkbook()
+  new.wb.name <- glue('{wb.path}/{file_path_sans_ext(dataName) %>%
+                      basename()} Sample.xlsx')
+
+
+  # include the original worksheet for reference
+  addWorksheet(new.wb, "Original")
+  writeData(new.wb, "Original", data)
+  setColWidths(new.wb, "Original", cols=1:ncol(data), widths="auto")
+  addStyle(new.wb, "Original", headerStyle, rows=1, cols=1:ncol(data))
+
+
   if(sampleType == 1L) {
     numSamples <- sampleSize+backups
-    addWorksheet(wb, "Simple Random Sample")
-    writeData(wb, "Simple Random Sample", data[sample(numSamples),])
-#    writeData(wb, "Simple Random Sample", data[sample(nrow(data)),])
-    saveWorkbook(wb, file="Samples.xlsx", overwrite=T)
+    addWorksheet(new.wb, "Simple Random Sample")
+    writeData(new.wb, "Simple Random Sample", data[sample(numSamples),])
+    saveWorkbook(new.wb, file="Samples.xlsx", overwrite=T)
 
   } else {
 
