@@ -29,9 +29,6 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
   ifelse(!is.numeric(seed), rns <- as.integer(Sys.time()), rns <- seed)
   set.seed(rns)
 
-  # wb <- createWorkbook()
-  # dataName <- file.choose()
-
   # choose the source file
   dataName <- file.choose()
 
@@ -73,6 +70,7 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
   addStyle(new.wb, "Original", headerStyle, rows=1, cols=1:ncol(data))
 
   if(sampleType == 1L) {
+    numStrata <- 1
     numSamples <- sampleSize+backups
     addWorksheet(new.wb, "Simple Random Sample")
     writeData(new.wb, "Simple Random Sample", data[sample(numSamples),])
@@ -94,6 +92,8 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
         prop * sampleSize < 1, 1, backups + prop * sampleSize
       )))
 
+    numStrata <- nrow(dataSamples)
+
     data.table::setDF(data)
     dataList <- split(data,data[stratifyOn])
 
@@ -101,7 +101,7 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
                       ~sample_n(.x, .y))
 
     if(sampleType == 2L){
-      addWorksheet(wb,"Stratified Random Sample")
+      addWorksheet(new.wb,"Stratified Random Sample")
       setColWidths(new.wb, "Stratified Random Sample", cols=1:ncol(data),
                    widths="auto")
       addStyle(new.wb, "Stratified Random Sample", headerStyle, rows=1,
@@ -112,22 +112,28 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
       dataTabs <- split(data2, data2[stratifyOn])
 
       Map(function(data, name){
-        addWorksheet(wb, name)
-        writeData(wb, name, data)
-        setColWidths(new.wb, "Tabbed Random Sample", cols=1:ncol(data),
+        addWorksheet(new.wb, name)
+        writeData(new.wb, name, data)
+        setColWidths(new.wb, name, cols=1:ncol(data),
                      widths="auto")
-        addStyle(new.wb, "Tabbed Random Sample", headerStyle, rows=1,
+        addStyle(new.wb, name, headerStyle, rows=1,
                  cols=1:ncol(data))
       }, dataTabs, names(dataTabs))
 
     }
     saveWorkbook(wb, new.wb.name, overwrite=T)
   }
-  report <- t(data.frame("Source"=dataName,"Source Size"=N,
+  report <- t(data.frame("Source"=dataName,
+                         "Source Size"=N,
                          "Sample Type"=sampleTypeName,
-                         "Sample Size"=sampleSize,'Backups'=backups,
+                         "Sample Size"=sampleSize,
+                         "Strata"=numStrata,
+                         "Backups"=backups,
                          "Random Number Seed"=rns,
-                         "Created"=file.info("samples.xlsx")$ctime))
+                         "Created"=file.info(new.wb.name)$ctime))
 
-  write.table(report,"Sampling Report.csv",col.names=F,sep=",")
+  write.table(report,
+              glue('{wb.path}/{file_path_sans_ext(new.wb.name) %>%
+                      basename()} Report.csv'),
+              col.names=F,sep=",")
 }
