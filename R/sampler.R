@@ -66,19 +66,21 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
   new.wb.name <- glue('{wb.path}/{file_path_sans_ext(dataName) %>%
                       basename()} Sample.xlsx')
 
-
   # include the original worksheet for reference
   addWorksheet(new.wb, "Original")
   writeData(new.wb, "Original", data)
   setColWidths(new.wb, "Original", cols=1:ncol(data), widths="auto")
   addStyle(new.wb, "Original", headerStyle, rows=1, cols=1:ncol(data))
 
-
   if(sampleType == 1L) {
     numSamples <- sampleSize+backups
     addWorksheet(new.wb, "Simple Random Sample")
     writeData(new.wb, "Simple Random Sample", data[sample(numSamples),])
-    saveWorkbook(new.wb, file="Samples.xlsx", overwrite=T)
+    setColWidths(new.wb, "Simple Random Sample", cols=1:ncol(data),
+                 widths="auto")
+    addStyle(new.wb, "Simple Random Sample", headerStyle, rows=1,
+             cols=1:ncol(data))
+    saveWorkbook(new.wb, new.wb.name, overwrite=T)
 
   } else {
 
@@ -100,6 +102,10 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
 
     if(sampleType == 2L){
       addWorksheet(wb,"Stratified Random Sample")
+      setColWidths(new.wb, "Stratified Random Sample", cols=1:ncol(data),
+                   widths="auto")
+      addStyle(new.wb, "Stratified Random Sample", headerStyle, rows=1,
+               cols=1:ncol(data))
       writeData(wb,"Stratified Random Sample", data2)
 
     } else if(sampleType == 3L){
@@ -108,10 +114,14 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
       Map(function(data, name){
         addWorksheet(wb, name)
         writeData(wb, name, data)
+        setColWidths(new.wb, "Tabbed Random Sample", cols=1:ncol(data),
+                     widths="auto")
+        addStyle(new.wb, "Tabbed Random Sample", headerStyle, rows=1,
+                 cols=1:ncol(data))
       }, dataTabs, names(dataTabs))
 
     }
-    saveWorkbook(wb, file = "Samples.xlsx", overwrite=T)
+    saveWorkbook(wb, new.wb.name, overwrite=T)
   }
   report <- t(data.frame("Source"=dataName,"Source Size"=N,
                          "Sample Type"=sampleTypeName,
