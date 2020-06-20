@@ -71,7 +71,7 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
 
   if(sampleType == 1L) {
     numStrata <- 1
-    numSamples <- sampleSize+backups
+    numSamples <- sampleSize+(numStrate*backups)
     addWorksheet(new.wb, "Simple Random Sample")
     writeData(new.wb, "Simple Random Sample", data[sample(numSamples),])
     setColWidths(new.wb, "Simple Random Sample", cols=1:ncol(data),
@@ -93,6 +93,7 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
       )))
 
     numStrata <- nrow(dataSamples)
+    numSamples <- sampleSize+(numStrata*backups)
 
     data.table::setDF(data)
     dataList <- split(data,data[stratifyOn])
@@ -101,12 +102,14 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
                       ~sample_n(.x, .y))
 
     if(sampleType == 2L){
+
       addWorksheet(new.wb,"Stratified Random Sample")
+      writeData(new.wb,"Stratified Random Sample", data2)
       setColWidths(new.wb, "Stratified Random Sample", cols=1:ncol(data),
                    widths="auto")
       addStyle(new.wb, "Stratified Random Sample", headerStyle, rows=1,
                cols=1:ncol(data))
-      writeData(wb,"Stratified Random Sample", data2)
+
 
     } else if(sampleType == 3L){
       dataTabs <- split(data2, data2[stratifyOn])
@@ -121,19 +124,19 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
       }, dataTabs, names(dataTabs))
 
     }
-    saveWorkbook(wb, new.wb.name, overwrite=T)
+    saveWorkbook(new.wb, new.wb.name, overwrite=T)
   }
   report <- t(data.frame("Source"=dataName,
                          "Source Size"=N,
                          "Sample Type"=sampleTypeName,
                          "Sample Size"=sampleSize,
                          "Strata"=numStrata,
-                         "Backups"=backups,
+                         "Backups per stratum"=backups,
                          "Random Number Seed"=rns,
                          "Created"=file.info(new.wb.name)$ctime))
 
   write.table(report,
               glue('{wb.path}/{file_path_sans_ext(new.wb.name) %>%
-                      basename()} Report.csv'),
+                      basename()} Report.txt'),
               col.names=F,sep=",")
 }
