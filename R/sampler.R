@@ -136,13 +136,11 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
                              "Random Number Seed"=rns,
                              "Created"=file.info(new.wb.name)$ctime))
     )
-    writeData(wb3,"Report",startRow=10,x=
+    writeData(new.wb,"Report",startRow=10,x=
                 format(dataSamples,digits=2))
 
     setColWidths(new.wb, "Report", cols=1:ncol(data),
                  widths="auto")
-    addStyle(new.wb, "Report", headerStyle, rows=1,
-             cols=1:ncol(data))
     saveWorkbook(new.wb,new.wb.name,overwrite=T)
 
   }
