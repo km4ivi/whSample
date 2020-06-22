@@ -36,7 +36,7 @@ The *sampler* function calls *ssize* to get its sample size estimate. Therefore,
 - **backups** provides a buffer for use if necessary to replace samples found to be invalid for some reason, and
 - **seed**, is used to seed the internal random number generator.
 
-The defaults for these arguments are *backups=5* and *seed=NULL*. The default seed will tell *sampler* to use the current system time in milliseconds (a common seeding approach).
+The defaults for these arguments are *backups=0* and *seed=NULL*. The default seed will tell *sampler* to use the current system time in milliseconds (a common seeding approach).
 
 To override any of these defaults, enter *name=value* as an argument.
 
@@ -44,10 +44,10 @@ To override any of these defaults, enter *name=value* as an argument.
 
 ## Output
 
-*sampler* generates two files:
-
+*sampler* creates a new Excel workbook in three parts:
+- a copy of the original (source) data,
 - an Excel spreadsheet with the requested sample, and
-- a CSV file called *Sampling Report.csv*. This file lists the:
+- a new tab called *Report* with key reference information:
 
   - path and name of the source file
   - size (in rows) of the source file
@@ -56,13 +56,15 @@ To override any of these defaults, enter *name=value* as an argument.
   - number of backups requested (this number is applied to every stratum in a stratified sample)
   - random number seed used, for documentation and reproducibility
   - date-time stamp of when the sample was generated
+  
+  - stratification information (name, number in the population, proportion of the population, and the number of samples)
 
 ## Installation
 
 You can install the latest version of whSample from the R console with:
 
 ``` r
-devtools::install_github("km4ivi/R-whSample")
+devtools::install_github("km4ivi/whSample")
 ```
 ### Other necessary packages
 
@@ -81,4 +83,4 @@ devtools::install_github("km4ivi/R-whSample")
 
 *sampler()*: Uses all defaults, gets N from the source data.
 
-*sampler(backups=0, seed=12345)*: Overrides specific defaults
+*sampler(backups=10, seed=12345)*: Overrides specific defaults

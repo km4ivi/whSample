@@ -42,7 +42,7 @@ passes to *ssize*.
     samples found to be invalid for some reason, and
   - **seed**, is used to seed the internal random number generator.
 
-The defaults for these arguments are *backups=5* and *seed=NULL*. The
+The defaults for these arguments are *backups=0* and *seed=NULL*. The
 default seed will tell *sampler* to use the current system time in
 milliseconds (a common seeding approach).
 
@@ -54,28 +54,35 @@ preferred sampling type.
 
 ## Output
 
-*sampler* generates two files:
+*sampler* creates a new Excel workbook in three parts: - a copy of the
+original (source) data, - an Excel spreadsheet with the requested
+sample, and - a new tab called *Report* with key reference information:
 
-  - an Excel spreadsheet with the requested sample, and
+  - path and name of the source file
 
-  - a CSV file called *Sampling Report.csv*. This file lists the:
-    
-      - path and name of the source file
-      - size (in rows) of the source file
-      - sample type (Simple Random Sample, Stratified Random Sample, or
-        Tabbed Stratified Sample)
-      - sample size
-      - number of backups requested (this number is applied to every
-        stratum in a stratified sample)
-      - random number seed used, for documentation and reproducibility
-      - date-time stamp of when the sample was generated
+  - size (in rows) of the source file
+
+  - sample type (Simple Random Sample, Stratified Random Sample, or
+    Tabbed Stratified Sample)
+
+  - sample size
+
+  - number of backups requested (this number is applied to every stratum
+    in a stratified sample)
+
+  - random number seed used, for documentation and reproducibility
+
+  - date-time stamp of when the sample was generated
+
+  - stratification information (name, number in the population,
+    proportion of the population, and the number of samples)
 
 ## Installation
 
 You can install the latest version of whSample from the R console with:
 
 ``` r
-devtools::install_github("km4ivi/R-whSample")
+devtools::install_github("km4ivi/whSample")
 ```
 
 ### Other necessary packages
@@ -96,4 +103,4 @@ these packages are installed:
 
 *sampler()*: Uses all defaults, gets N from the source data.
 
-*sampler(backups=0, seed=12345)*: Overrides specific defaults
+*sampler(backups=10, seed=12345)*: Overrides specific defaults
