@@ -124,29 +124,28 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
       }, dataTabs, names(dataTabs))
 
     }
-    saveWorkbook(new.wb, new.wb.name, overwrite=T)
+    addWorksheet(new.wb,"Report")
+    writeData(new.wb,"Report",colNames=F,rowNames=T,x=
+
+                t(data.frame("Source"=dataName,
+                             "Source Size"=N,
+                             "Sample Type"=sampleTypeName,
+                             "Sample Size"=sampleSize,
+                             "Strata"=numStrata,
+                             "Backups per stratum"=backups,
+                             "Random Number Seed"=rns,
+                             "Created"=file.info(new.wb.name)$ctime))
+    )
+    writeData(wb3,"Report",startRow=10,x=
+                format(dataSamples,digits=2))
+
+    setColWidths(new.wb, "Report", cols=1:ncol(data),
+                 widths="auto")
+    addStyle(new.wb, "Report", headerStyle, rows=1,
+             cols=1:ncol(data))
+    saveWorkbook(new.wb,new.wb.name,overwrite=T)
+
   }
 
-  # Add a blank row as a space between parts of the table
-  report <- t(data.frame("Source"=dataName,
-                         "Source Size"=N,
-                         "Sample Type"=sampleTypeName,
-                         "Sample Size"=sampleSize,
-                         "Strata"=numStrata,
-                         "Backups per stratum"=backups,
-                         "Random Number Seed"=rns,
-                         "Created"=file.info(new.wb.name)$ctime)) %>%
-    rbind(c("",""))
 
-  write.table(report,
-              glue('{wb.path}/{file_path_sans_ext(new.wb.name) %>%
-                      basename()} Report.csv'),
-              quote=F, na=" ",
-              col.names=F,sep=",")
-
-  write.table(format(dataSamples,digits=2),
-              glue('{wb.path}/{file_path_sans_ext(new.wb.name) %>%
-                      basename()} Report.csv'),
-              append=T, row.names=F, quote=F,
-              col.names=T,sep=",")
 }
