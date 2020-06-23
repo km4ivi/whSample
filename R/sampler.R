@@ -20,11 +20,24 @@
 
 sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
 
+  # install necessary packages
+  is_installed <- function(mypkg) is.element(mypkg, installed.packages()[,1])
+  do.pkgs <- function(pkgNames){
+    for(pkg in pkgNames){
+      if(!is_installed(pkg)){
+        install.packages(pkg, repos="http://lib.stat.cmu.edu/R/CRAN")
+      }
+    }
+  }
+  do.pkgs(c("magrittr","tools","purrr","openxlsx","data.table","dplyr","glue"))
+
   # set up the Excel style
   headerStyle <- createStyle(halign="center", valign="center",
                              borderColour="black", textDecoration="bold",
                              border="TopBottomLeftRight", wrapText=F,
                              borderStyle="thin", fgFill="#e7e6e6") # lt gray
+
+  pctStyle <- createStyle(halign="center", numFmt="PERCENTAGE")
 
   ifelse(!is.numeric(seed), rns <- as.integer(Sys.time()), rns <- seed)
   set.seed(rns)
@@ -139,8 +152,9 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
     writeData(new.wb,"Report",startRow=10,x=
                 format(dataSamples,digits=2))
 
-    setColWidths(new.wb, "Report", cols=1:ncol(data),
-                 widths="auto")
+    setColWidths(new.wb, "Report", cols=1:ncol(data), widths="auto")
+    addStyle(new.wb, "Report", pctStyle, rows=11:11+nrow(dataSamples), cols=3)
+
     saveWorkbook(new.wb,new.wb.name,overwrite=T)
 
   }
