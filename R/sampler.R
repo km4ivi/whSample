@@ -157,14 +157,16 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
     addStyle(new.wb, "Report", hdrStyle, rows=1, cols=1:2)
     setColWidths(new.wb, "Report", cols=1:2, widths="auto")
 
-    writeData(new.wb,"Report", startRow=1, startCol=4, borders="all",
-              withFilter=F, x=format.data.frame(dataSamples,digits=2))
+    if(numStrata!=1L) {
+      writeData(new.wb,"Report", startRow=1, startCol=4, borders="all",
+                withFilter=F, x=format.data.frame(dataSamples,digits=2))
 
-    addStyle(new.wb, "Report", hdrStyle, rows=1, cols=4:7)
-    addStyle(new.wb, "Report", pctStyle, rows=2:nrow(dataSamples)+1, cols=6,
-             stack=T)
-    setColWidths(new.wb, "Report", cols=4:(ncol(dataSamples)+4),
-                 widths="auto")
+      addStyle(new.wb, "Report", hdrStyle, rows=1, cols=4:7)
+      addStyle(new.wb, "Report", pctStyle, rows=2:nrow(dataSamples)+1, cols=6,
+               stack=T)
+      setColWidths(new.wb, "Report", cols=4:(ncol(dataSamples)+4),
+                   widths="auto")
+    }
 
     saveWorkbook(new.wb,new.wb.name,overwrite=T)
 
