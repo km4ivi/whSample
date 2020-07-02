@@ -10,6 +10,8 @@
 #' @importFrom data.table fread
 #' @import dplyr
 #' @import glue
+#' @importFrom stats qnorm
+#' @importFrom utils install.packages, installed.packages
 #' @section Details:
 #' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 #' @examples
@@ -22,14 +24,15 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
 
   # install necessary packages
   is_installed <- function(mypkg) is.element(mypkg, installed.packages()[,1])
-  do.pkgs <- function(pkgNames){
+  whInstall <- function(pkgNames){
     for(pkg in pkgNames){
       if(!is_installed(pkg)){
         install.packages(pkg, repos="http://lib.stat.cmu.edu/R/CRAN")
       }
+      library(pkg, character.only=T, quietly=T, verbose=F)
     }
   }
-  do.pkgs(c("magrittr","tools","purrr","openxlsx","data.table","dplyr","glue"))
+  whInstall(c("magrittr","tools","purrr","openxlsx","data.table","dplyr","glue"))
 
   # set up the Excel style
   hdrStyle <- createStyle(halign="center", valign="center",
@@ -48,17 +51,21 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
   # save the path to it so we can write to the same place
   wb.path <- dirname(dataName)
 
-  wb <- loadWorkbook(dataName)
+  wb <- createWorkbook(dataName)
 
   if(file_ext(dataName)=='xlsx') {
-    data <- read.xlsx(wb)
+    data <- read.xlsx(dataName)
   } else if(file_ext(dataName)=='csv') {
-    data <- fread(wb)
+    data <- fread(dataName)
   } else paste("Not a valid data file")
 
   N <- nrow(data)
 
   sampleSize <- whSample::ssize(N, ci, me, p)
+
+  numBackups <- utils::menu(c(0, 5, 10,"Custom"),
+                         graphics=T, title="Number of backups")
+  backups <- switch(numBackups, 0, 5, 10, backups)
 
   sampleType <- utils::menu(c("Simple Random Sample",
                               "Stratified Random Sample",
@@ -80,7 +87,6 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
   addWorksheet(new.wb, "Original")
   writeDataTable(new.wb, "Original", data, tableName="Data")
   setColWidths(new.wb, "Original", cols=1:ncol(data), widths="auto")
-  # addStyle(new.wb, "Original", headerStyle, rows=1, cols=1:ncol(data))
 
   if(sampleType == 1L) {
     numStrata <- 1
@@ -90,9 +96,7 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
               tableName="SRS")
     setColWidths(new.wb, "Simple Random Sample", cols=1:ncol(data),
                  widths="auto")
-    # addStyle(new.wb, "Simple Random Sample", hdrStyle, rows=1,
-    #          cols=1:ncol(data))
-    saveWorkbook(new.wb, new.wb.name, overwrite=T)
+    # saveWorkbook(new.wb, new.wb.name, overwrite=T)
 
   } else {
 
@@ -139,8 +143,9 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
       }, dataTabs, names(dataTabs))
 
     }
+  }
     addWorksheet(new.wb,"Report")
-    writeData(new.wb,"Report", borders="all",x=
+    writeData(new.wb,"Report", withFilter=F, borders="all", x=
                 data.frame("Variable"=c("Source","Source Size","Sample Type",
                                         "Sample Size",
                                         "Strata","Backups per Stratum",
@@ -148,21 +153,19 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
                            "Value"=c(dataName, N, sampleTypeName, sampleSize,
                                      numStrata, backups, rns,
                                      as.character(
-                                       file.info(new.wb.name)$ctime))))
+                                       Sys.time()))))
     addStyle(new.wb, "Report", hdrStyle, rows=1, cols=1:2)
     setColWidths(new.wb, "Report", cols=1:2, widths="auto")
 
     writeData(new.wb,"Report", startRow=1, startCol=4, borders="all",
-              x=format(dataSamples,digits=2))
+              withFilter=F, x=format.data.frame(dataSamples,digits=2))
 
     addStyle(new.wb, "Report", hdrStyle, rows=1, cols=4:7)
-    addStyle(new.wb, "Report", pctStyle, rows=2:nrow(dataSamples), cols=6,
+    addStyle(new.wb, "Report", pctStyle, rows=2:nrow(dataSamples)+1, cols=6,
              stack=T)
-    setColWidths(new.wb, "Report", cols=4:(ncol(dataSamples)+4), widths="auto")
+    setColWidths(new.wb, "Report", cols=4:(ncol(dataSamples)+4),
+                 widths="auto")
 
     saveWorkbook(new.wb,new.wb.name,overwrite=T)
-
-  }
-
 
 }

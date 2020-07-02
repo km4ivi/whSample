@@ -1,7 +1,7 @@
 Package: whSample
 Type: Package
 Title: Utilities for Sampling
-Version: 0.5.0
+Version: 0.6.0
 Author: Paul West
 Maintainer: Paul West <fp8049@gmail.com>
 Description: Interteractive tools for generating random samples
@@ -12,5 +12,8 @@ Imports:
     data.table,
     magrittr,
     openxlsx,
+    dplyr,
+    purrr,
+    glue,
     tools
 RoxygenNote: 7.0.2
