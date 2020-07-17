@@ -29,7 +29,8 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
       if(!is_installed(pkg)){
         install.packages(pkg, repos="http://lib.stat.cmu.edu/R/CRAN")
       }
-      library(pkg, character.only=T, quietly=T, verbose=F)
+      suppressMessages(suppressWarnings(
+        library(pkg, character.only=T, quietly=T, verbose=F)))
     }
   }
   whInstall(c("magrittr","tools","purrr","openxlsx","data.table","dplyr","glue"))
