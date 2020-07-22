@@ -9,7 +9,7 @@
 #' @import openxlsx
 #' @importFrom data.table fread
 #' @import dplyr
-#' @import glue
+#' @importFrom glue glue
 #' @importFrom stats qnorm
 #' @section Details:
 #' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
