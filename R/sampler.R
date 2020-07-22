@@ -11,7 +11,6 @@
 #' @import dplyr
 #' @import glue
 #' @importFrom stats qnorm
-#' @importFrom utils install.packages, installed.packages
 #' @section Details:
 #' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 #' @examples
@@ -21,19 +20,6 @@
 #'
 
 sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
-
-  # install necessary packages
-  is_installed <- function(mypkg) is.element(mypkg, installed.packages()[,1])
-  whInstall <- function(pkgNames){
-    for(pkg in pkgNames){
-      if(!is_installed(pkg)){
-        install.packages(pkg, repos="http://lib.stat.cmu.edu/R/CRAN")
-      }
-      suppressMessages(suppressWarnings(
-        library(pkg, character.only=T, quietly=T, verbose=F)))
-    }
-  }
-  whInstall(c("magrittr","tools","purrr","openxlsx","data.table","dplyr","glue"))
 
   # set up the Excel style
   hdrStyle <- createStyle(halign="center", valign="center",

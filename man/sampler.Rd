@@ -4,7 +4,7 @@
 \alias{sampler}
 \title{Generate Sample Lists from Excel or CSV Files}
 \usage{
-sampler(ci = 0.95, me = 0.07, p = 0.5, backups = 5, seed = NULL)
+sampler(ci = 0.95, me = 0.07, p = 0.5, backups = 0, seed = NULL)
 }
 \value{
 Writes samples to an Excel workbook and generates a report summary.
