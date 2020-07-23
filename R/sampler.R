@@ -11,6 +11,11 @@
 #' @import dplyr
 #' @importFrom glue glue
 #' @importFrom stats qnorm
+#' @param ci the required confidence level
+#' @param me the margin of error
+#' @param p the expected probability of occurrence
+#' @param backups the number of available replacements
+#' @param seed the random number seed
 #' @section Details:
 #' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 #' @examples
@@ -18,6 +23,7 @@
 #' sampler(backups=0, p=0.6)
 #' @export
 #'
+utils::globalVariables("prop")
 
 sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
 

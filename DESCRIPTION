@@ -1,10 +1,10 @@
 Package: whSample
 Type: Package
 Title: Utilities for Sampling
-Version: 0.6.4
+Version: 0.6.5
 Author: Paul West
 Maintainer: Paul West <fp8049@gmail.com>
-Description: Interteractive tools for generating random samples
+Description: Interteractive tools for generating random samples.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
