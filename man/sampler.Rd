@@ -26,6 +26,8 @@ Writes samples to an Excel workbook and generates a report summary.
 }
 
 \examples{
+\dontrun{
 sampler()
 sampler(backups=5, p=0.6)
+}
 }

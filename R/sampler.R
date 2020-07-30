@@ -21,8 +21,10 @@
 #' @section Details:
 #' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 #' @examples
+#' \dontrun{
 #' sampler()
 #' sampler(backups=5, p=0.6)
+#' }
 
 utils::globalVariables("prop")
 
