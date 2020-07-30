@@ -3,8 +3,16 @@
 \name{sampler}
 \alias{sampler}
 \title{Generate Sample Lists from Excel or CSV Files}
-\usage{
-sampler(ci = 0.95, me = 0.07, p = 0.5, backups = 5, seed = NULL)
+\arguments{
+\item{ci}{the required confidence level}
+
+\item{me}{the margin of error}
+
+\item{p}{the expected probability of occurrence}
+
+\item{backups}{the number of available replacements}
+
+\item{seed}{the random number seed}
 }
 \value{
 Writes samples to an Excel workbook and generates a report summary.
@@ -18,6 +26,8 @@ Writes samples to an Excel workbook and generates a report summary.
 }
 
 \examples{
+\dontrun{
 sampler()
-sampler(backups=0, p=0.6)
+sampler(backups=5, p=0.6)
+}
 }

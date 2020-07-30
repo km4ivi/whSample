@@ -3,28 +3,41 @@
 #' \code{sampler} generates Simple Random or Stratified samples
 #'
 #' @return Writes samples to an Excel workbook and generates a report summary.
+#' @name sampler
 #' @importFrom magrittr "%>%"
 #' @importFrom tools file_ext
 #' @importFrom purrr map2_dfr
 #' @import openxlsx
 #' @importFrom data.table fread
 #' @import dplyr
-#' @import glue
+#' @importFrom glue glue
+#' @importFrom stats qnorm
+#' @importFrom utils head tail
+#' @param ci the required confidence level
+#' @param me the margin of error
+#' @param p the expected probability of occurrence
+#' @param backups the number of available replacements
+#' @param seed the random number seed
+#' @export
 #' @section Details:
 #' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 #' @examples
+#' \dontrun{
 #' sampler()
-#' sampler(backups=0, p=0.6)
-#' @export
-#'
+#' sampler(backups=5, p=0.6)
+#' }
 
-sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
+utils::globalVariables("prop")
+
+sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
   # set up the Excel style
-  headerStyle <- createStyle(halign="center", valign="center",
-                             borderColour="black", textDecoration="bold",
-                             border="TopBottomLeftRight", wrapText=F,
-                             borderStyle="thin", fgFill="#e7e6e6") # lt gray
+  hdrStyle <- createStyle(halign="center", valign="center",
+                          borderColour="black", textDecoration="bold",
+                          border="TopBottomLeftRight", wrapText=F,
+                          borderStyle="thin", fgFill="#e7e6e6") # lt gray
+
+  pctStyle <- createStyle(halign="center", numFmt="0.0%")
 
   ifelse(!is.numeric(seed), rns <- as.integer(Sys.time()), rns <- seed)
   set.seed(rns)
@@ -35,17 +48,22 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
   # save the path to it so we can write to the same place
   wb.path <- dirname(dataName)
 
-  wb <- loadWorkbook(dataName)
+  wb <- createWorkbook(dataName)
 
   if(file_ext(dataName)=='xlsx') {
-    data <- read.xlsx(wb)
+    data <- read.xlsx(dataName)
   } else if(file_ext(dataName)=='csv') {
-    data <- fread(wb)
+    data <- fread(dataName)
   } else paste("Not a valid data file")
 
   N <- nrow(data)
 
   sampleSize <- whSample::ssize(N, ci, me, p)
+
+  numBackups <- utils::menu(c("0", "5", "10"),
+                         graphics=T, title="Number of backups")
+  backups <- ifelse(numBackups==0, backups,
+                    switch(numBackups, 0, 5, 10))
 
   sampleType <- utils::menu(c("Simple Random Sample",
                               "Stratified Random Sample",
@@ -65,20 +83,35 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
 
   # include the original worksheet for reference
   addWorksheet(new.wb, "Original")
-  writeData(new.wb, "Original", data)
+  writeDataTable(new.wb, "Original", data, tableName="Data")
   setColWidths(new.wb, "Original", cols=1:ncol(data), widths="auto")
-  addStyle(new.wb, "Original", headerStyle, rows=1, cols=1:ncol(data))
 
   if(sampleType == 1L) {
     numStrata <- 1
-    numSamples <- sampleSize+(numStrate*backups)
+    numSamples <- sampleSize+backups
     addWorksheet(new.wb, "Simple Random Sample")
-    writeData(new.wb, "Simple Random Sample", data[sample(numSamples),])
+
+    allSamples <- sample_n(data, numSamples)
+    primarySamples <- head(allSamples, sampleSize)
+    backupSamples <- tail(allSamples, backups)
+
+    writeDataTable(new.wb, "Simple Random Sample", primarySamples,
+              tableName="primarySRS")
+
+    mergeCells(new.wb, "Simple Random Sample", cols=1:length(primarySamples),
+               rows=nrow(primarySamples)+3)
+    writeData(new.wb, "Simple Random Sample", "Backup Samples",
+              startRow=nrow(primarySamples)+3)
+    addStyle(new.wb,"Simple Random Sample", hdrStyle,
+             rows=nrow(primarySamples)+3,
+             cols=1:length(primarySamples))
+
+    writeDataTable(new.wb, "Simple Random Sample", backupSamples,
+                   startRow=nrow(primarySamples)+4)
+
     setColWidths(new.wb, "Simple Random Sample", cols=1:ncol(data),
                  widths="auto")
-    addStyle(new.wb, "Simple Random Sample", headerStyle, rows=1,
-             cols=1:ncol(data))
-    saveWorkbook(new.wb, new.wb.name, overwrite=T)
+    # saveWorkbook(new.wb, new.wb.name, overwrite=T)
 
   } else {
 
@@ -104,11 +137,12 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
     if(sampleType == 2L){
 
       addWorksheet(new.wb,"Stratified Random Sample")
-      writeData(new.wb,"Stratified Random Sample", data2)
+      writeDataTable(new.wb,"Stratified Random Sample", data2,
+                     tableName="Stratified")
       setColWidths(new.wb, "Stratified Random Sample", cols=1:ncol(data),
                    widths="auto")
-      addStyle(new.wb, "Stratified Random Sample", headerStyle, rows=1,
-               cols=1:ncol(data))
+      # addStyle(new.wb, "Stratified Random Sample", hdrStyle, rows=1,
+      #          cols=1:ncol(data))
 
 
     } else if(sampleType == 3L){
@@ -116,34 +150,39 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=0, seed=NULL) {
 
       Map(function(data, name){
         addWorksheet(new.wb, name)
-        writeData(new.wb, name, data)
+        writeDataTable(new.wb, name, data)
         setColWidths(new.wb, name, cols=1:ncol(data),
                      widths="auto")
-        addStyle(new.wb, name, headerStyle, rows=1,
-                 cols=1:ncol(data))
+        # addStyle(new.wb, name, hdrStyle, rows=1,
+        #          cols=1:ncol(data))
       }, dataTabs, names(dataTabs))
 
     }
-    addWorksheet(new.wb,"Report")
-    writeData(new.wb,"Report",colNames=F,rowNames=T,x=
-
-                t(data.frame("Source"=dataName,
-                             "Source Size"=N,
-                             "Sample Type"=sampleTypeName,
-                             "Sample Size"=sampleSize,
-                             "Strata"=numStrata,
-                             "Backups per stratum"=backups,
-                             "Random Number Seed"=rns,
-                             "Created"=file.info(new.wb.name)$ctime))
-    )
-    writeData(new.wb,"Report",startRow=10,x=
-                format(dataSamples,digits=2))
-
-    setColWidths(new.wb, "Report", cols=1:ncol(data),
-                 widths="auto")
-    saveWorkbook(new.wb,new.wb.name,overwrite=T)
-
   }
+    addWorksheet(new.wb,"Report")
+    writeData(new.wb,"Report", withFilter=F, borders="all", x=
+                data.frame("Variable"=c("Source","Source Size","Sample Type",
+                                        "Sample Size",
+                                        "Strata","Backups per Stratum",
+                                        "Random Number Seed", "Created"),
+                           "Value"=c(dataName, N, sampleTypeName, sampleSize,
+                                     numStrata, backups, rns,
+                                     as.character(
+                                       Sys.time()))))
+    addStyle(new.wb, "Report", hdrStyle, rows=1, cols=1:2)
+    setColWidths(new.wb, "Report", cols=1:2, widths="auto")
 
+    if(numStrata!=1L) {
+      writeData(new.wb,"Report", startRow=1, startCol=4, borders="all",
+                withFilter=F, x=format.data.frame(dataSamples,digits=2))
+
+      addStyle(new.wb, "Report", hdrStyle, rows=1, cols=4:7)
+      addStyle(new.wb, "Report", pctStyle, rows=2:nrow(dataSamples)+1, cols=6,
+               stack=T)
+      setColWidths(new.wb, "Report", cols=4:(ncol(dataSamples)+4),
+                   widths="auto")
+    }
+
+    saveWorkbook(new.wb,new.wb.name,overwrite=T)
 
 }
