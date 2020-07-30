@@ -12,6 +12,7 @@
 #' @import dplyr
 #' @importFrom glue glue
 #' @importFrom stats qnorm
+#' @importFrom utils head tail
 #' @param ci the required confidence level
 #' @param me the margin of error
 #' @param p the expected probability of occurrence
@@ -59,9 +60,10 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
   sampleSize <- whSample::ssize(N, ci, me, p)
 
-  numBackups <- utils::menu(c(0, 5, 10,"Custom"),
+  numBackups <- utils::menu(c("0", "5", "10"),
                          graphics=T, title="Number of backups")
-  backups <- switch(numBackups, 0, 5, 10, backups)
+  backups <- ifelse(numBackups==0, backups,
+                    switch(numBackups, 0, 5, 10))
 
   sampleType <- utils::menu(c("Simple Random Sample",
                               "Stratified Random Sample",
@@ -86,10 +88,27 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
   if(sampleType == 1L) {
     numStrata <- 1
-    numSamples <- sampleSize+(numStrata*backups)
+    numSamples <- sampleSize+backups
     addWorksheet(new.wb, "Simple Random Sample")
-    writeDataTable(new.wb, "Simple Random Sample", data[sample(numSamples),],
-              tableName="SRS")
+
+    allSamples <- sample_n(data, numSamples)
+    primarySamples <- head(allSamples, sampleSize)
+    backupSamples <- tail(allSamples, backups)
+
+    writeDataTable(new.wb, "Simple Random Sample", primarySamples,
+              tableName="primarySRS")
+
+    mergeCells(new.wb, "Simple Random Sample", cols=1:length(primarySamples),
+               rows=nrow(primarySamples)+3)
+    writeData(new.wb, "Simple Random Sample", "Backup Samples",
+              startRow=nrow(primarySamples)+3)
+    addStyle(new.wb,"Simple Random Sample", hdrStyle,
+             rows=nrow(primarySamples)+3,
+             cols=1:length(primarySamples))
+
+    writeDataTable(new.wb, "Simple Random Sample", backupSamples,
+                   startRow=nrow(primarySamples)+4)
+
     setColWidths(new.wb, "Simple Random Sample", cols=1:ncol(data),
                  widths="auto")
     # saveWorkbook(new.wb, new.wb.name, overwrite=T)
