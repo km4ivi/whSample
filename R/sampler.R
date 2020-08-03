@@ -60,10 +60,10 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
   sampleSize <- whSample::ssize(N, ci, me, p)
 
-  numBackups <- utils::menu(c("0", "5", "10"),
+  backupMenu <- utils::menu(c("0", "5", "10"),
                          graphics=T, title="Number of backups")
-  backups <- ifelse(numBackups==0, backups,
-                    switch(numBackups, 0, 5, 10))
+  backups <- ifelse(backupMenu==0, backups,
+                    switch(backupMenu, 0, 5, 10))
 
   sampleType <- utils::menu(c("Simple Random Sample",
                               "Stratified Random Sample",
@@ -120,31 +120,48 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
       data.table::setDT() %>% mutate(prop = prop.table(n)) %>%
       mutate(numSamples = ceiling(ifelse(
         backups +
-        prop * sampleSize < 1, 1, backups + prop * sampleSize
+        prop * sampleSize < 1, 1, prop * sampleSize
       ))) %>%
-      mutate(withBackups=ifelse(
-        numSamples+backups > n, numSamples+(n-numSamples),
-        numSamples+backups))
+      mutate(numBackups=ifelse(
+        numSamples+backups > n, (n-numSamples), backups))
 
     numStrata <- nrow(dataSamples)
-    numSamples <- sampleSize+(numStrata*backups)
 
-    data.table::setDF(data)
-    dataList <- split(data,data[stratifyOn])
+    primarySamples <- split(data, data[stratifyOn]) %>%
+      map2_dfr(., dataSamples$numSamples,
+               ~head(.x, .y))
 
-    data2 <- map2_dfr(dataList, dataSamples$numSamples,
-                      ~sample_n(.x, .y))
+    backupSamples <- split(data, data[stratifyOn]) %>%
+      map2_dfr(., dataSamples$numBackups,
+               ~tail(.x, .y))
+
+    # numSamples <- sampleSize+(numStrata*backups)
+
+    # data.table::setDF(data)
+    # dataList <- split(data,data[stratifyOn])
+    #
+    # data2 <- map2_dfr(dataList, dataSamples$numSamples,
+    #                   ~sample_n(.x, .y))
 
     if(sampleType == 2L){
 
       addWorksheet(new.wb,"Stratified Random Sample")
-      writeDataTable(new.wb,"Stratified Random Sample", data2,
+      writeDataTable(new.wb,"Stratified Random Sample", primarySamples,
                      tableName="Stratified")
+
+      mergeCells(new.wb, "Stratified Random Sample", cols=1:length(primarySamples),
+                 rows=nrow(primarySamples)+3)
+      writeData(new.wb, "Stratified Random Sample", "Backup Samples",
+                startRow=nrow(primarySamples)+3)
+      addStyle(new.wb,"Stratified Random Sample", hdrStyle,
+               rows=nrow(primarySamples)+3,
+               cols=1:length(primarySamples))
+
+      writeDataTable(new.wb, "Stratified Random Sample", backupSamples,
+                     startRow=nrow(primarySamples)+4)
+
       setColWidths(new.wb, "Stratified Random Sample", cols=1:ncol(data),
                    widths="auto")
-      # addStyle(new.wb, "Stratified Random Sample", hdrStyle, rows=1,
-      #          cols=1:ncol(data))
-
 
     } else if(sampleType == 3L){
       dataTabs <- split(data2, data2[stratifyOn])
