@@ -111,8 +111,6 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
     setColWidths(new.wb, "Simple Random Sample", cols=1:ncol(data),
                  widths="auto")
-    # saveWorkbook(new.wb, new.wb.name, overwrite=T)
-
   } else {
 
     stratifyOn <- names(data)[utils::menu(names(data), graphics=T,
@@ -123,7 +121,10 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
       mutate(numSamples = ceiling(ifelse(
         backups +
         prop * sampleSize < 1, 1, backups + prop * sampleSize
-      )))
+      ))) %>%
+      mutate(withBackups=ifelse(
+        numSamples+backups > n, numSamples+(n-numSamples),
+        numSamples+backups))
 
     numStrata <- nrow(dataSamples)
     numSamples <- sampleSize+(numStrata*backups)
