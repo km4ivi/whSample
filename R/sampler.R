@@ -135,14 +135,6 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
       map2_dfr(., dataSamples$numBackups,
                ~tail(.x, .y))
 
-    # numSamples <- sampleSize+(numStrata*backups)
-
-    # data.table::setDF(data)
-    # dataList <- split(data,data[stratifyOn])
-    #
-    # data2 <- map2_dfr(dataList, dataSamples$numSamples,
-    #                   ~sample_n(.x, .y))
-
     if(sampleType == 2L){
 
       addWorksheet(new.wb,"Stratified Random Sample")
@@ -164,16 +156,27 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
                    widths="auto")
 
     } else if(sampleType == 3L){
-      dataTabs <- split(data2, data2[stratifyOn])
+      primaryTabs <- split(primarySamples, primarySamples[stratifyOn])
+      backupTabs <- split(backupSamples, backupSamples[stratifyOn])
 
-      Map(function(data, name){
+      invisible(Map(function(primary, backup, name) {
         addWorksheet(new.wb, name)
-        writeDataTable(new.wb, name, data)
-        setColWidths(new.wb, name, cols=1:ncol(data),
+        writeDataTable(new.wb, name, primary)
+
+        mergeCells(new.wb, name, cols=1:length(primary),
+                   rows=nrow(primary)+3)
+        writeData(new.wb, name, "Backup Samples",
+                  startRow=nrow(primary)+3)
+        addStyle(new.wb,name, hdrStyle,
+                 rows=nrow(primary)+3,
+                 cols=1:length(primary))
+
+        writeDataTable(new.wb, name, backup,
+                       startRow=nrow(primary)+4)
+
+        setColWidths(new.wb, name, cols=1:ncol(primary),
                      widths="auto")
-        # addStyle(new.wb, name, hdrStyle, rows=1,
-        #          cols=1:ncol(data))
-      }, dataTabs, names(dataTabs))
+      }, primaryTabs, backupTabs, names(primaryTabs)))
 
     }
   }
@@ -194,7 +197,7 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
       writeData(new.wb,"Report", startRow=1, startCol=4, borders="all",
                 withFilter=F, x=format.data.frame(dataSamples,digits=2))
 
-      addStyle(new.wb, "Report", hdrStyle, rows=1, cols=4:7)
+      addStyle(new.wb, "Report", hdrStyle, rows=1, cols=4:8)
       addStyle(new.wb, "Report", pctStyle, rows=2:nrow(dataSamples)+1, cols=6,
                stack=T)
       setColWidths(new.wb, "Report", cols=4:(ncol(dataSamples)+4),
