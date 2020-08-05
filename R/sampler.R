@@ -5,7 +5,7 @@
 #' @return Writes samples to an Excel workbook and generates a report summary.
 #' @name sampler
 #' @importFrom magrittr "%>%"
-#' @importFrom tools file_ext
+#' @import tools
 #' @importFrom purrr map2_dfr
 #' @import openxlsx
 #' @importFrom data.table fread
@@ -27,7 +27,7 @@
 #' sampler(backups=5, p=0.6)
 #' }
 
-utils::globalVariables("prop")
+utils::globalVariables(c("prop","."))
 
 sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
@@ -36,6 +36,8 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
                           borderColour="black", textDecoration="bold",
                           border="TopBottomLeftRight", wrapText=F,
                           borderStyle="thin", fgFill="#e7e6e6") # lt gray
+
+  tableStyle <- createStyle(halign="center")
 
   pctStyle <- createStyle(halign="center", numFmt="0.0%")
 
@@ -60,10 +62,10 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
   sampleSize <- whSample::ssize(N, ci, me, p)
 
-  numBackups <- utils::menu(c("0", "5", "10"),
+  backupMenu <- utils::menu(c("0", "5", "10"),
                          graphics=T, title="Number of backups")
-  backups <- ifelse(numBackups==0, backups,
-                    switch(numBackups, 0, 5, 10))
+  backups <- ifelse(backupMenu==0, backups,
+                    switch(backupMenu, 0, 5, 10))
 
   sampleType <- utils::menu(c("Simple Random Sample",
                               "Stratified Random Sample",
@@ -83,8 +85,10 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
   # include the original worksheet for reference
   addWorksheet(new.wb, "Original")
-  writeDataTable(new.wb, "Original", data, tableName="Data")
+  writeDataTable(new.wb, "Original", data, tableName="Data", withFilter=F)
   setColWidths(new.wb, "Original", cols=1:ncol(data), widths="auto")
+  addStyle(new.wb, "Original", tableStyle,
+           rows=1, cols=1:length(data))
 
   if(sampleType == 1L) {
     numStrata <- 1
@@ -96,7 +100,9 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
     backupSamples <- tail(allSamples, backups)
 
     writeDataTable(new.wb, "Simple Random Sample", primarySamples,
-              tableName="primarySRS")
+              tableName="primarySRS", withFilter=F)
+    addStyle(new.wb, "Simple Random Sample", tableStyle,
+             rows=1, cols=1:length(primarySamples))
 
     mergeCells(new.wb, "Simple Random Sample", cols=1:length(primarySamples),
                rows=nrow(primarySamples)+3)
@@ -111,8 +117,6 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
     setColWidths(new.wb, "Simple Random Sample", cols=1:ncol(data),
                  widths="auto")
-    # saveWorkbook(new.wb, new.wb.name, overwrite=T)
-
   } else {
 
     stratifyOn <- names(data)[utils::menu(names(data), graphics=T,
@@ -122,45 +126,78 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
       data.table::setDT() %>% mutate(prop = prop.table(n)) %>%
       mutate(numSamples = ceiling(ifelse(
         backups +
-        prop * sampleSize < 1, 1, backups + prop * sampleSize
-      )))
+        prop * sampleSize < 1, 1, prop * sampleSize
+      ))) %>%
+      mutate(numBackups=ifelse(
+        numSamples+backups > n, (n-numSamples), backups))
 
     numStrata <- nrow(dataSamples)
-    numSamples <- sampleSize+(numStrata*backups)
 
-    data.table::setDF(data)
-    dataList <- split(data,data[stratifyOn])
+    setDF(data)
+    primarySamples <- split(data, data[stratifyOn]) %>%
+      map2_dfr(., dataSamples$numSamples,
+               ~head(.x, .y))
 
-    data2 <- map2_dfr(dataList, dataSamples$numSamples,
-                      ~sample_n(.x, .y))
+    backupSamples <- split(data, data[stratifyOn]) %>%
+      map2_dfr(., dataSamples$numBackups,
+               ~tail(.x, .y))
 
     if(sampleType == 2L){
 
       addWorksheet(new.wb,"Stratified Random Sample")
-      writeDataTable(new.wb,"Stratified Random Sample", data2,
-                     tableName="Stratified")
+      writeDataTable(new.wb,"Stratified Random Sample", primarySamples,
+                     tableName="Stratified", withFilter=F)
+      addStyle(new.wb, "Stratified Random Sample", tableStyle,
+               rows=1, cols=1:length(primarySamples))
+
+      mergeCells(new.wb, "Stratified Random Sample",
+                 cols=1:length(primarySamples),
+                 rows=nrow(primarySamples)+3)
+      writeData(new.wb, "Stratified Random Sample", "Backup Samples",
+                startRow=nrow(primarySamples)+3)
+      addStyle(new.wb,"Stratified Random Sample", hdrStyle,
+               rows=nrow(primarySamples)+3,
+               cols=1:length(primarySamples))
+
+      writeDataTable(new.wb, "Stratified Random Sample", backupSamples,
+                     startRow=nrow(primarySamples)+4,
+                     tableName="Stratified_Backups", withFilter=F)
+      addStyle(new.wb, "Stratified Random Sample", tableStyle,
+               rows=nrow(primarySamples)+4, cols=1:length(primarySamples))
+
       setColWidths(new.wb, "Stratified Random Sample", cols=1:ncol(data),
                    widths="auto")
-      # addStyle(new.wb, "Stratified Random Sample", hdrStyle, rows=1,
-      #          cols=1:ncol(data))
-
 
     } else if(sampleType == 3L){
-      dataTabs <- split(data2, data2[stratifyOn])
+      primaryTabs <- split(primarySamples, primarySamples[stratifyOn])
+      backupTabs <- split(backupSamples, backupSamples[stratifyOn])
 
-      Map(function(data, name){
+      invisible(Map(function(primary, backup, name) {
         addWorksheet(new.wb, name)
-        writeDataTable(new.wb, name, data)
-        setColWidths(new.wb, name, cols=1:ncol(data),
+        writeDataTable(new.wb, name, primary, withFilter=F)
+        addStyle(new.wb, name, tableStyle, rows=1, cols=1:length(primary))
+
+        mergeCells(new.wb, name, cols=1:length(primary),
+                   rows=nrow(primary)+3)
+        writeData(new.wb, name, "Backup Samples",
+                  startRow=nrow(primary)+3)
+        addStyle(new.wb,name, hdrStyle,
+                 rows=nrow(primary)+3,
+                 cols=1:length(primary))
+
+        writeDataTable(new.wb, name, backup,
+                       startRow=nrow(primary)+4, withFilter=F)
+        addStyle(new.wb, name, tableStyle,
+                 rows=nrow(primary)+4, cols=1:length(primary))
+
+        setColWidths(new.wb, name, cols=1:ncol(primary),
                      widths="auto")
-        # addStyle(new.wb, name, hdrStyle, rows=1,
-        #          cols=1:ncol(data))
-      }, dataTabs, names(dataTabs))
+      }, primaryTabs, backupTabs, names(primaryTabs)))
 
     }
   }
     addWorksheet(new.wb,"Report")
-    writeData(new.wb,"Report", withFilter=F, borders="all", x=
+    writeDataTable(new.wb,"Report", withFilter=F, x=
                 data.frame("Variable"=c("Source","Source Size","Sample Type",
                                         "Sample Size",
                                         "Strata","Backups per Stratum",
@@ -169,15 +206,15 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
                                      numStrata, backups, rns,
                                      as.character(
                                        Sys.time()))))
-    addStyle(new.wb, "Report", hdrStyle, rows=1, cols=1:2)
+    # addStyle(new.wb, "Report", hdrStyle, rows=1, cols=1:2)
     setColWidths(new.wb, "Report", cols=1:2, widths="auto")
 
     if(numStrata!=1L) {
-      writeData(new.wb,"Report", startRow=1, startCol=4, borders="all",
-                withFilter=F, x=format.data.frame(dataSamples,digits=2))
+      writeDataTable(new.wb,"Report", startRow=1, startCol=4,
+                withFilter=F, x=data.frame(dataSamples))
 
-      addStyle(new.wb, "Report", hdrStyle, rows=1, cols=4:7)
-      addStyle(new.wb, "Report", pctStyle, rows=2:nrow(dataSamples)+1, cols=6,
+      # addStyle(new.wb, "Report", hdrStyle, rows=1, cols=4:8)
+      addStyle(new.wb, "Report", pctStyle, rows=1:nrow(dataSamples)+1, cols=6,
                stack=T)
       setColWidths(new.wb, "Report", cols=4:(ncol(dataSamples)+4),
                    widths="auto")
