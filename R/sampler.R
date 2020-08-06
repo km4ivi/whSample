@@ -27,7 +27,7 @@
 #' sampler(backups=5, p=0.6)
 #' }
 
-utils::globalVariables(c("prop","."))
+utils::globalVariables(c("prop", ".", "setDF"))
 
 sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
@@ -53,7 +53,11 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
   wb <- createWorkbook(dataName)
 
   if(file_ext(dataName)=='xlsx') {
-    data <- read.xlsx(dataName)
+    sheetNames <- (getSheetNames(dataName))
+    tabMenu <- utils::menu(sheetNames, graphics=T,
+                            title="Use sheet")
+    SrcTab <- sheetNames[tabMenu]
+    data <- read.xlsx(dataName, sheet=SrcTab)
   } else if(file_ext(dataName)=='csv') {
     data <- fread(dataName)
   } else paste("Not a valid data file")
