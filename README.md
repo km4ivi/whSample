@@ -9,6 +9,8 @@ workbook. Users have a choice of Simple Random or Stratified Random
 samples, and a third choice of having each stratum included in a
 separate worksheet.
 
+See package vignettes for detailed documentation.
+
 ## ssize
 
 The workhorse function is *sampler*. A helper function, *ssize*,
@@ -42,15 +44,14 @@ passes to *ssize*.
     samples found to be invalid for some reason, and
   - **seed**, is used to seed the internal random number generator.
 
-The defaults for these arguments are *backups=0* and *seed=NULL*. The
+The defaults for these arguments are *backups=5* and *seed=NULL*. The
 default seed will tell *sampler* to use the current system time in
 milliseconds (a common seeding approach).
 
 To override any of these defaults, enter *name=value* as an argument.
 
-*sampler* will pop up a file chooser to allow the user to navigate to
-the source file. It then will pop up a menu to let the user pick the
-preferred sampling type.
+*sampler* uses a series of menus to guide users through the sampling
+process.
 
 ## Output
 
@@ -66,6 +67,8 @@ sample, and - a new tab called *Report* with key reference information:
     Tabbed Stratified Sample)
 
   - sample size
+
+  - number of strata
 
   - number of backups requested (this number is applied to every stratum
     in a stratified sample)
@@ -94,6 +97,7 @@ these packages are installed:
   - openxlsx
   - data.table
   - tools
+  - glue
 
 ## Examples
 
