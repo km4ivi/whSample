@@ -8,7 +8,7 @@
 #' @import tools
 #' @importFrom purrr map2_dfr
 #' @import openxlsx
-#' @importFrom data.table fread
+#' @importFrom data.table fread setDF setDT
 #' @import dplyr
 #' @importFrom glue glue
 #' @importFrom stats qnorm
@@ -27,7 +27,7 @@
 #' sampler(backups=5, p=0.6)
 #' }
 
-utils::globalVariables(c("prop", ".", "setDF"))
+utils::globalVariables(c("prop", "."))
 
 sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
 
