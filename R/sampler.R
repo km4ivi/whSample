@@ -204,9 +204,13 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
     writeDataTable(new.wb,"Report", withFilter=F, x=
                 data.frame("Variable"=c("Source","Source Size","Sample Type",
                                         "Sample Size",
+                                        "Desired Confidence Level",
+                                        "Desired Margin of Error",
+                                        "Anticipated Rate of Occurrence",
                                         "Strata","Backups per Stratum",
                                         "Random Number Seed", "Created"),
                            "Value"=c(dataName, N, sampleTypeName, sampleSize,
+                                     ci, me, p,
                                      numStrata, backups, rns,
                                      as.character(
                                        Sys.time()))))
