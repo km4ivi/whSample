@@ -22,9 +22,8 @@
 #' @section Details:
 #' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 #' @examples
-#' \dontrun{
-#' sampler()
-#' sampler(backups=5, p=0.6)
+#' if(interactive()){
+#' sampler(backups=3, p=0.6)
 #' }
 
 utils::globalVariables(c("prop", "."))
@@ -44,7 +43,9 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
   ifelse(!is.numeric(seed), rns <- as.integer(Sys.time()), rns <- seed)
   set.seed(rns)
 
-  # choose the source file
+  # choose the source
+  oldwd <- getwd()
+  setwd(system.file("extdata", package="whSample"))
   dataName <- file.choose()
 
   # save the path to it so we can write to the same place
@@ -229,5 +230,8 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
     }
 
     saveWorkbook(new.wb,new.wb.name,overwrite=T)
+    openXL(new.wb.name)
+
+    setwd(oldwd)
 
 }
