@@ -42,9 +42,14 @@ To override any of these defaults, enter *name=value* as an argument when callin
 sampler(p=0.06)
 ```
 
-. More on changing the number of backups in a minute.
+More on changing the number of backups in a minute.
 
-## Running ***sampler***
+## Jump right in
+
+***Sampler*** includes an .xlsx and a .csv version of Anderson's Iris dataset that characterizes the flower's variations. The [Examples](#jump_in) section will get you started with *sampler*. Or keep reading for a detailed walk-through.
+
+
+## Running ***sampler*** {#running}
 
 The easiest way to run *sampler* is by calling it from the R console:
 
@@ -98,6 +103,9 @@ The "Stratify on" menu lists all the column headers in the selected worksheet. *
     - size (in rows) of the source file
     - sample type (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample)
     - sample size
+    - desired confidence level
+    - desired margin of error
+    - anticipated rate of occurrence
     - number of strata
     - number of backups per stratum
     - random number seed used, for documentation and reproducibility
@@ -137,8 +145,16 @@ devtools::install_github("km4ivi/whSample")
 - tools
 - glue
 
-## Examples
+## Examples {#jump_in}
 
-*sampler()*: Uses all defaults, gets N from the source data.
+Running *sampler()* from the R console's **>** prompt will launch *sampler* with all the defaults and will open a file chooser with *iris.xlsx* and *iris.csv* options. *sampler* will read either format and generate an Excel file with the sampling paramaters you choose. A series of menus will take you step by step and will launch an Excel-compatible app if one is on your system.
 
-*sampler(backups=10, seed=12345)*: Overrides specific defaults
+*Sampler* puts the output file in the same folder as the source file by default. If you don't have an Excel-compatible app installed, you can find the output folder by entering this command at the **>** prompt:
+
+```{r eval=FALSE}
+system.file("extdata", package="whSample")
+```
+
+*sampler(p=0.6, seed=12345)* Will override those specific defaults. You can override the other defaults in the same way.
+
+If you skipped it, now's a good time to read the [rest of the vignette](#running).
