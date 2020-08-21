@@ -86,7 +86,7 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
   # create a new output workbook
   new.wb <- createWorkbook()
   new.wb.name <- glue('{wb.path}/{file_path_sans_ext(dataName) %>%
-                      basename()} Sample.xlsx')
+                      basename()}_Sample.xlsx')
 
   # include the original worksheet for reference
   addWorksheet(new.wb, "Original")
