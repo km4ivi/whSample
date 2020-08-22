@@ -28,9 +28,8 @@
 
 utils::globalVariables(c("prop", "."))
 
-sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
+sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
 
-  # set up the Excel style
   hdrStyle <- createStyle(halign="center", valign="center",
                           borderColour="black", textDecoration="bold",
                           border="TopBottomLeftRight", wrapText=F,
@@ -43,9 +42,10 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
   ifelse(!is.numeric(seed), rns <- as.integer(Sys.time()), rns <- seed)
   set.seed(rns)
 
-  # choose the source
   oldwd <- getwd()
-  setwd(system.file("extdata", package="whSample"))
+  if(example != F)
+    setwd(system.file("extdata", package="whSample"))
+
   dataName <- file.choose()
 
   # save the path to it so we can write to the same place
@@ -83,7 +83,6 @@ sampler <- function(ci=0.95, me=0.07, p=0.50, backups=5, seed=NULL) {
                            "Stratified Random Sample",
                            "Tabbed Stratified Sample")
 
-  # create a new output workbook
   new.wb <- createWorkbook()
   new.wb.name <- glue('{wb.path}/{file_path_sans_ext(dataName) %>%
                       basename()}_Sample.xlsx')

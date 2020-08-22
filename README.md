@@ -15,7 +15,7 @@ See package vignettes for detailed documentation.
 
 The workhorse function is *sampler*. A helper function, *ssize*,
 estimates the minimum sample size necessary to achieve statistical
-requirements using a Normal Approximation of the Hypergeometric
+requirements using a Normal Approximation to the Hypergeometric
 Distribution. This distribution spans the probabilities of yes/no-type
 responses without replacement. These parameters are:
 
@@ -38,15 +38,17 @@ The *sampler* function calls *ssize* to get its sample size estimate.
 Therefore, it requires the **ci**, **me**, and **p** argments, which it
 passes to *ssize*.
 
-*sampler* also takes two additional arguments:
+*sampler* also takes three additional arguments:
 
+  - **example** opens the file chooser to a folder with example files of
+    Anderston’s Iris dataset of flower characteristics.
   - **backups** provides a buffer for use if necessary to replace
     samples found to be invalid for some reason, and
   - **seed**, is used to seed the internal random number generator.
 
-The defaults for these arguments are *backups=5* and *seed=NULL*. The
-default seed will tell *sampler* to use the current system time in
-milliseconds (a common seeding approach).
+The defaults for these arguments are *backups=5*, *example=F* and
+*seed=NULL*. The default seed will tell *sampler* to use the current
+system time in milliseconds (a common seeding approach).
 
 To override any of these defaults, enter *name=value* as an argument.
 
@@ -82,7 +84,13 @@ sample, and - a new tab called *Report* with key reference information:
 
 ## Installation
 
-You can install the latest version of whSample from the R console with:
+You can install *whSample* from CRAN with:
+
+``` r
+install.packages("whSample")
+```
+
+or get the latest developmental version with:
 
 ``` r
 devtools::install_github("km4ivi/whSample")
@@ -90,8 +98,9 @@ devtools::install_github("km4ivi/whSample")
 
 ### Other necessary packages
 
-*sampler* depends on several external packages to run properly. Ensure
-these packages are installed:
+*sampler* depends on several external packages to run properly. If
+you’re running a developmental version, make sure these packages are
+installed on your computer:
 
   - tidyverse (or individually: magrittr, dplyr, purrr)
   - openxlsx
@@ -107,4 +116,4 @@ these packages are installed:
 
 *sampler()*: Uses all defaults, gets N from the source data.
 
-*sampler(backups=10, seed=12345)*: Overrides specific defaults
+*sampler(backups=2, seed=12345)*: Overrides specific defaults
