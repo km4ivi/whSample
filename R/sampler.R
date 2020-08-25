@@ -10,9 +10,9 @@
 #' @import openxlsx
 #' @importFrom data.table fread setDF setDT
 #' @import dplyr
-#' @importFrom glue glue
 #' @importFrom stats qnorm
 #' @importFrom utils head tail
+#' @importFrom tools file_path_sans_ext
 #' @param ci the required confidence level
 #' @param me the margin of error
 #' @param p the expected probability of occurrence
@@ -26,7 +26,7 @@
 #' sampler(backups=3, p=0.6)
 #' }
 
-utils::globalVariables(c("prop", "."))
+utils::globalVariables(c("prop", ".", "jchoose.dir", "jchoose.files"))
 
 sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
 
@@ -42,13 +42,19 @@ sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
   ifelse(!is.numeric(seed), rns <- as.integer(Sys.time()), rns <- seed)
   set.seed(rns)
 
-  oldwd <- getwd()
-  if(example != F)
-    setwd(system.file("extdata", package="whSample"))
+  ifelse(example == F,
+         dataName <- jchoose.files("Select source file", multi=FALSE),
+         dataName <- jchoose.files(system.file("extdata", package="whSample"),
+                       "Select source file", multi=FALSE)
+         )
 
-  dataName <- file.choose()
 
-  # save the path to it so we can write to the same place
+  # if(example != F)
+  #   setwd(system.file("extdata", package="whSample"))
+  #
+  # dataName <- file.choose()
+
+  # # save the path to it so we can write to the same place
   wb.path <- dirname(dataName)
 
   wb <- createWorkbook(dataName)
@@ -84,8 +90,10 @@ sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
                            "Tabbed Stratified Sample")
 
   new.wb <- createWorkbook()
-  new.wb.name <- glue('{wb.path}/{file_path_sans_ext(dataName) %>%
-                      basename()}_Sample.xlsx')
+  # new.wb.name <- glue('{wb.path}/{file_path_sans_ext(dataName) %>%
+  #                     basename()}_Sample.xlsx')
+
+  new.wb.name <- paste0(file_path_sans_ext(basename(dataName)),"_Sample.xlsx")
 
   # include the original worksheet for reference
   addWorksheet(new.wb, "Original")
@@ -142,9 +150,18 @@ sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
       map2_dfr(., dataSamples$numSamples,
                ~head(.x, .y))
 
+    # test <- split(data, data[stratifyOn]) %>%
+    #   map2_dfr(., dataSamples$numBackups, ~(.x, .y))
+
     backupSamples <- split(data, data[stratifyOn]) %>%
       map2_dfr(., dataSamples$numBackups,
                ~tail(.x, .y))
+    if(backups==0) {
+      newRow <- rep(0, ncol(backupSamples))
+      backupSamples[nrow(backupSamples) +1, ] <- newRow
+    }
+
+
 
     if(sampleType == 2L){
 
@@ -217,6 +234,8 @@ sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
     # addStyle(new.wb, "Report", hdrStyle, rows=1, cols=1:2)
     setColWidths(new.wb, "Report", cols=1:2, widths="auto")
 
+
+
     if(numStrata!=1L) {
       writeDataTable(new.wb,"Report", startRow=1, startCol=4,
                 withFilter=F, x=data.frame(dataSamples))
@@ -228,9 +247,10 @@ sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
                    widths="auto")
     }
 
-    saveWorkbook(new.wb,new.wb.name,overwrite=T)
-    openXL(new.wb.name)
+    saveDir <- jchoose.dir(dirname(dataName),
+                           caption="Select output directory (Cancel will exit without saving)")
 
-    setwd(oldwd)
+    saveWorkbook(new.wb, paste(saveDir, new.wb.name, sep="\\"), overwrite=T)
 
+    openXL(paste(saveDir, new.wb.name, sep="\\"))
 }
