@@ -40,13 +40,13 @@ passes to *ssize*.
 
 *sampler* also takes three additional arguments:
 
-  - **example** opens the file chooser to a folder with example files of
-    Anderston’s Iris dataset of flower characteristics.
+  - **irisData** opens the file chooser to a folder with example files
+    of Anderston’s Iris dataset of flower characteristics.
   - **backups** provides a buffer for use if necessary to replace
     samples found to be invalid for some reason, and
   - **seed**, is used to seed the internal random number generator.
 
-The defaults for these arguments are *backups=5*, *example=F* and
+The defaults for these arguments are *backups=5*, *irisData=F* and
 *seed=NULL*. The default seed will tell *sampler* to use the current
 system time in milliseconds (a common seeding approach).
 
@@ -106,7 +106,8 @@ installed on your computer:
   - openxlsx
   - data.table
   - tools
-  - glue
+  - utils
+  - tcltk
 
 ## Examples
 
