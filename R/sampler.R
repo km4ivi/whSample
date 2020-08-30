@@ -10,10 +10,10 @@
 #' @import openxlsx
 #' @importFrom data.table fread setDF setDT
 #' @import dplyr
-#' @import rJava
-#' @importFrom rChoiceDialogs rchoose.files rchoose.dir
 #' @importFrom stats qnorm
-#' @importFrom tools file_path_sans_ext
+#' @importFrom tools file_path_sans_ext file_ext
+#' @importFrom utils head tail
+#' @importFrom tcltk tk_choose.dir tk_choose.files
 #' @param ci the required confidence level
 #' @param me the margin of error
 #' @param p the expected probability of occurrence
@@ -27,9 +27,9 @@
 #' sampler(backups=3, p=0.6)
 #' }
 
-utils::globalVariables(c("prop", ".", "jchoose.dir", "jchoose.files"))
+utils::globalVariables(c("prop", "."))
 
-sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
+sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
 
   hdrStyle <- createStyle(halign="center", valign="center",
                           borderColour="black", textDecoration="bold",
@@ -44,11 +44,20 @@ sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
   set.seed(rns)
 
   # File chooser will start at extdata dir for Iris if example != F
-  ifelse(example == F,
-         dataName <- rchoose.files("Select source file", multi=FALSE),
-         dataName <- rchoose.files(system.file("extdata", package="whSample"),
-                       "Select source file", multi=FALSE)
+  Filters <- matrix(c("Excel file", ".xlsx", "CSV file", ".csv"),
+                    2, 2, byrow=TRUE)
+
+  irisDir <- paste0(system.file("extdata", package="whSample"),
+                    "/iris.xlsx")
+  ifelse(irisData == F,
+         dataName <- tk_choose.files(path.expand("~"), "Select source file",
+                                     multi=FALSE, filters=Filters),
+         dataName <- tk_choose.files(irisDir, "Select source file",
+                                     multi=FALSE, filters=Filters)
          )
+  if(length(dataName) > 1){
+    dataName <- paste(dataName, collapse=" ")
+  }
 
   wb <- createWorkbook(dataName)
 
@@ -235,7 +244,7 @@ sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
                    widths="auto")
     }
 
-    saveDir <- rchoose.dir(dirname(dataName),
+    saveDir <- tk_choose.dir(dirname(dataName),
                            caption="Select output directory (Cancel will exit without saving)")
 
     saveWorkbook(new.wb, paste(saveDir, new.wb.name, sep="\\"), overwrite=T)

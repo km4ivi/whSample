@@ -24,17 +24,17 @@ The *sampler* function calls [***ssize***](Using_ssize.html) to get its sample s
 
 ***Sampler*** takes three additional arguments:
 
-- **example** opens the file chooser to a folder with example files of Anderston's Iris dataset of flower characteristics.
+- **irisData** opens the file chooser to a folder with example files of Anderston's Iris dataset of flower characteristics. This is useful for learning basic functionality. Any entry other than **F** will open to the folder, although you can navigate from a different folder from there if desired.
 - **backups** provides a buffer for use if necessary to replace samples found to be invalid for some reason, and
 - **seed**, used to seed the internal random number generator.
 
 The full range of command-line options is:
 
 ```{r eval=FALSE}
-sampler <- function(backups=5, example=F, ci=0.95, me=0.07, p=0.50, seed=NULL)
+sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL)
 ```
 
-The defaults for these additional arguments are *backups=5*, *example=F* and *seed=NULL*. The default seed will tell *sampler* to use the current system time in milliseconds. Any number can be used as a seed. Whichever one is used will be listed in the *Report* output tab.
+The defaults for these additional arguments are *backups=5*, *irisData=F* and *seed=NULL*. The default seed will tell *sampler* to use the current system time in milliseconds. Any number can be used as a seed. Whichever one is used will be listed in the *Report* output tab.
 
 To override any of these defaults, enter *name=value* as an argument when calling *sampler*, as in:
 
@@ -143,13 +143,11 @@ devtools::install_github("km4ivi/whSample")
 - openxlsx
 - data.table
 - tools
-- rChoiceDialogs
-
-The rChoiceDialogs package provide the file chooser windows and requires Java to be installed on your computer.
+- tcltk
 
 ## Examples {#jump_in}
 
-Running *sampler(example=T)* from the R console's **>** prompt will launch *sampler* with all the defaults and will open a file chooser with *iris.xlsx* and *iris.csv* options. *sampler* will read either format and generate an Excel file with the sampling paramaters you choose. A series of menus will take you step by step through the process and will open the generated spreadsheet with an Excel-compatible app if one is on your computer.
+Running *sampler(irisData=T)* from the R console's **>** prompt will launch *sampler* with the other defaults and will open a file chooser with *iris.xlsx* and *iris.csv* options. *sampler* will read either format and generate an Excel file with the sampling parameters you choose. A series of menus will take you step by step through the process and will open the generated spreadsheet with an Excel-compatible app if one is on your computer.
 
 *Sampler* will pop up a directory chooser to let you decide where to put the output file. By default, it will offer the same folder as the source file. If you used the example file and don't have an Excel-compatible app installed, you can find the output folder by entering this command at the **>** prompt:
 
