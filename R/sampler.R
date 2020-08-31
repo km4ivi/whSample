@@ -5,7 +5,6 @@
 #' @return Writes samples to an Excel workbook and generates a report summary.
 #' @name sampler
 #' @importFrom magrittr "%>%"
-#' @import tools
 #' @importFrom purrr map2_dfr
 #' @import openxlsx
 #' @importFrom data.table fread setDF setDT
