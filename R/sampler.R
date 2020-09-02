@@ -9,10 +9,10 @@
 #' @import openxlsx
 #' @importFrom data.table fread setDF setDT
 #' @import dplyr
-#' @importFrom stats qnorm
 #' @importFrom tools file_path_sans_ext file_ext
 #' @importFrom utils head tail
 #' @importFrom tcltk tk_choose.dir tk_choose.files
+#' @importFrom stats qnorm
 #' @param ci the required confidence level
 #' @param me the margin of error
 #' @param p the expected probability of occurrence
@@ -244,9 +244,12 @@ sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL) 
     }
 
     saveDir <- tk_choose.dir(dirname(dataName),
-                           caption="Select output directory (Cancel will exit without saving)")
+                           caption="Select output directory (Cancel will open the sample file without saving)")
 
-    saveWorkbook(new.wb, paste(saveDir, new.wb.name, sep="\\"), overwrite=T)
-
-    openXL(paste(saveDir, new.wb.name, sep="\\"))
+    invisible(ifelse(!is.na(saveDir),
+    {
+      saveWorkbook(new.wb, paste(saveDir, new.wb.name, sep="\\"), overwrite=T)
+      openXL(paste(saveDir, new.wb.name, sep="\\"))
+    },
+    openXL(new.wb)))
 }

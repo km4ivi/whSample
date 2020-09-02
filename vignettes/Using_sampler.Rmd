@@ -149,7 +149,9 @@ devtools::install_github("km4ivi/whSample")
 
 Running *sampler(irisData=T)* from the R console's **>** prompt will launch *sampler* with the other defaults and will open a file chooser with *iris.xlsx* and *iris.csv* options. *sampler* will read either format and generate an Excel file with the sampling parameters you choose. A series of menus will take you step by step through the process and will open the generated spreadsheet with an Excel-compatible app if one is on your computer.
 
-*Sampler* will pop up a directory chooser to let you decide where to put the output file. By default, it will offer the same folder as the source file. If you used the example file and don't have an Excel-compatible app installed, you can find the output folder by entering this command at the **>** prompt:
+*Sampler* will pop up a directory chooser to let you decide where to put the output file. By default, it will offer the same folder as the source file. If you want to see the output Excel file without first saving it, hit *Cancel*. The file will open but won't automatically be saved. You can save it from Excel if you want.
+
+If you used the example file and don't have an Excel-compatible app installed, you can find the output folder by entering this command at the **>** prompt:
 
 ```{r eval=FALSE}
 system.file("extdata", package="whSample")
