@@ -38,17 +38,23 @@ The *sampler* function calls *ssize* to get its sample size estimate.
 Therefore, it requires the **ci**, **me**, and **p** arguments, which it
 passes to *ssize*.
 
-*sampler* also takes three additional arguments:
+*sampler* also takes four additional arguments:
 
   - **irisData** opens the file chooser to a folder with example files
     of Anderston’s Iris dataset of flower characteristics.
   - **backups** provides a buffer for use if necessary to replace
-    samples found to be invalid for some reason, and
-  - **seed**, is used to seed the internal random number generator.
+    samples found to be invalid for some reason,
+  - **seed** is used to seed the internal random number generator, and
+  - **keepOrg** determines if a copy of the population is included in
+    the output.
 
-The defaults for these arguments are *backups=5*, *irisData=F* and
-*seed=NULL*. The default seed will tell *sampler* to use the current
-system time in milliseconds (a common seeding approach).
+The defaults for these arguments are *backups=5*, *irisData=F*,
+*seed=NULL*, and *keepOrg=T*. The default seed will tell *sampler* to
+use the current system time in milliseconds (a common seeding approach).
+The keep-original option (*keepOrg*) defaults to TRUE, but should be
+*keepOrg=F* for populations larger than about a million records since
+Excel’s row limit is 1,048,576 and *sampler* adds some header and blank
+lines to its output.
 
 To override any of these defaults, enter *name=value* as an argument.
 
@@ -112,6 +118,7 @@ installed on your computer:
   - tools
   - utils
   - tcltk
+  - bit64
 
 ## Examples
 

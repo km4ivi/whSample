@@ -9,6 +9,7 @@
 #' @import openxlsx
 #' @importFrom data.table fread setDF setDT
 #' @import dplyr
+#' @import bit64
 #' @importFrom tools file_path_sans_ext file_ext
 #' @importFrom utils head tail
 #' @importFrom tcltk tk_choose.dir tk_choose.files
@@ -20,7 +21,7 @@
 #' @param seed the random number seed
 #' @export
 #' @section Details:
-#' \code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
+#' \code{sampler} lets users select an Excel or delimited text (.csv or .txt) data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 #' @examples
 #' if(interactive()){
 #' sampler(backups=3, p=0.6)
@@ -28,7 +29,8 @@
 
 utils::globalVariables(c("prop", "."))
 
-sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL) {
+sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL,
+                    keepOrg=T) {
 
   hdrStyle <- createStyle(halign="center", valign="center",
                           borderColour="black", textDecoration="bold",
@@ -43,8 +45,8 @@ sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL) 
   set.seed(rns)
 
   # File chooser will start at extdata dir for Iris if example != F
-  Filters <- matrix(c("Excel file", ".xlsx", "CSV file", ".csv"),
-                    2, 2, byrow=TRUE)
+  Filters <- matrix(c("Excel file", ".xlsx", "CSV file", ".csv",
+                      "Delimited text", ".txt"), 3, 2, byrow=TRUE)
 
   irisDir <- paste0(system.file("extdata", package="whSample"),
                     "/iris.xlsx")
@@ -66,7 +68,7 @@ sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL) 
                             title="Use sheet")
     SrcTab <- sheetNames[tabMenu]
     data <- read.xlsx(dataName, sheet=SrcTab)
-  } else if(file_ext(dataName)=='csv') {
+  } else if(file_ext(dataName)=='csv' || file_ext(dataName)=='txt') {
     data <- fread(dataName)
   } else paste("Not a valid data file")
 
@@ -95,11 +97,13 @@ sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL) 
   new.wb.name <- paste0(file_path_sans_ext(basename(dataName)),"_Sample.xlsx")
 
   # Include original data in output for reference
-  addWorksheet(new.wb, "Original")
-  writeDataTable(new.wb, "Original", data, tableName="Data", withFilter=F)
-  setColWidths(new.wb, "Original", cols=1:ncol(data), widths="auto")
-  addStyle(new.wb, "Original", tableStyle,
-           rows=1, cols=1:length(data))
+  if(keepOrg == T) {
+    addWorksheet(new.wb, "Original")
+    writeDataTable(new.wb, "Original", data, tableName="Data", withFilter=F)
+    setColWidths(new.wb, "Original", cols=1:ncol(data), widths="auto")
+    addStyle(new.wb, "Original", tableStyle,
+             rows=1, cols=1:length(data))
+  }
 
   if(sampleType == 1L) {
     numStrata <- 1

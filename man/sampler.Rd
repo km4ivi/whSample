@@ -22,7 +22,7 @@ Writes samples to an Excel workbook and generates a report summary.
 }
 \section{Details}{
 
-\code{sampler} lets users select an Excel or CSV data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
+\code{sampler} lets users select an Excel or delimited text (.csv or .txt) data file and the type of sample they prefer (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample with each stratum in a different Excel worksheet).
 }
 
 \examples{

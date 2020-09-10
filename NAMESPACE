@@ -2,6 +2,7 @@
 
 export(sampler)
 export(ssize)
+import(bit64)
 import(dplyr)
 import(openxlsx)
 importFrom(data.table,fread)
