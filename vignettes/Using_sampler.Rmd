@@ -22,19 +22,20 @@ The ***sampler*** function is part of the ***whSample*** package of utilities fo
 
 The *sampler* function calls [***ssize***](Using_ssize.html) to get its sample size estimate. *Sampler* uses the same sample size defaults as *ssize* and they can be overridden when launching *sampler* from the command line.
 
-***Sampler*** takes three additional arguments:
+***sampler*** takes four additional arguments:
 
-- **irisData** opens the file chooser to a folder with example files of Anderston's Iris dataset of flower characteristics. This is useful for learning basic functionality. Any entry other than **F** will open to the folder, although you can navigate from a different folder from there if desired.
-- **backups** provides a buffer for use if necessary to replace samples found to be invalid for some reason, and
-- **seed**, used to seed the internal random number generator.
+- **irisData** opens the file chooser to a folder with example files of Anderston's Iris dataset of flower characteristics.
+- **backups** provides a buffer for use if necessary to replace samples found to be invalid for some reason,
+- **seed** is used to seed the internal random number generator, and
+- **keepOrg** determines if a copy of the population is included in the output.
 
 The full range of command-line options is:
 
 ```{r eval=FALSE}
-sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL)
+sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL, keepOrg=T)
 ```
 
-The defaults for these additional arguments are *backups=5*, *irisData=F* and *seed=NULL*. The default seed will tell *sampler* to use the current system time in milliseconds. Any number can be used as a seed. Whichever one is used will be listed in the *Report* output tab.
+The defaults for these additional arguments are *backups=5*, *irisData=F*, *seed=NULL* and *keepOrg=T". The default seed will tell *sampler* to use the current system time in milliseconds. Any number can be used as a seed. Whichever one is used will be listed in the *Report* output tab. The keep-original option (*keepOrg*) defaults to TRUE, but should be *keepOrg=F* for populations larger than about a million records since Excel's row limit is 1,048,576 and *sampler* adds some header and blank lines to its output.
 
 To override any of these defaults, enter *name=value* as an argument when calling *sampler*, as in:
 
@@ -59,7 +60,7 @@ sampler()
 
 ### Choose the source data file
 
-A file chooser will appear to select a source file. *Sampler* will remember where the source file came from and will put the resulting output file in the same folder with the name ***source file name*** **Sample.xlsx**.
+A file chooser will appear to select a source file. *Sampler* will remember where the source file came from and will put the resulting output file in the same folder with the name ***source file name_Sample.xlsx***.
 
 *Sampler* will read Excel or delimited text files.
 
@@ -79,7 +80,7 @@ sampler(backups=25)
 
 **Important note:** At this point, if you specified a number of backups on the command line, **hit** ***Cancel*** and *sampler* will use the number you specified. Clicking Okay will accept whatever was highlighted in the menu. If you didn't specify a number on the command line and hit Cancel, *sampler* will use the default of five.
 
-For a Simple Random Sample, the startup command shown above will add the next 25 items from the randomized population to a separate table at the end of the output Excel workbook.
+For a Simple Random Sample, the startup example shown above will add the next 25 items from the randomized population to a separate table at the end of the output Excel workbook.
 
 Stratified samples will include 25 backups **for each stratum**. This could be a problem if a given stratum doesn't have 25 more items to include. In this case, *sampler* will scale back the number of backups to the number of items available for that stratum. The ***Report tab*** will list the number of backups actually provided for each stratum.
 
@@ -144,10 +145,11 @@ devtools::install_github("km4ivi/whSample")
 - data.table
 - tools
 - tcltk
+- bit64
 
 ## Examples {#jump_in}
 
-Running *sampler(irisData=T)* from the R console's **>** prompt will launch *sampler* with the other defaults and will open a file chooser with *iris.xlsx* and *iris.csv* options. *sampler* will read either format and generate an Excel file with the sampling parameters you choose. A series of menus will take you step by step through the process and will open the generated spreadsheet with an Excel-compatible app if one is on your computer.
+Running *sampler(irisData=T)* from the R console's **>** prompt will launch *sampler* with the other defaults and will open a file chooser with *iris.xlsx* and *iris.csv* options (check the file type drop down for different suffixes). *sampler* will read either format (or delimited text) and generate an Excel file with the sampling parameters you choose. A series of menus will take you step by step through the process and will open the generated spreadsheet with an Excel-compatible app if one is on your computer.
 
 *Sampler* will pop up a directory chooser to let you decide where to put the output file. By default, it will offer the same folder as the source file. If you want to see the output Excel file without first saving it, hit *Cancel*. The file will open but won't automatically be saved. You can save it from Excel if you want.
 
