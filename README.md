@@ -35,20 +35,26 @@ example).
 ## sampler
 
 The *sampler* function calls *ssize* to get its sample size estimate.
-Therefore, it requires the **ci**, **me**, and **p** argments, which it
+Therefore, it requires the **ci**, **me**, and **p** arguments, which it
 passes to *ssize*.
 
-*sampler* also takes three additional arguments:
+*sampler* also takes four additional arguments:
 
   - **irisData** opens the file chooser to a folder with example files
     of Anderston’s Iris dataset of flower characteristics.
   - **backups** provides a buffer for use if necessary to replace
-    samples found to be invalid for some reason, and
-  - **seed**, is used to seed the internal random number generator.
+    samples found to be invalid for some reason,
+  - **seed** is used to seed the internal random number generator, and
+  - **keepOrg** determines if a copy of the population is included in
+    the output.
 
-The defaults for these arguments are *backups=5*, *irisData=F* and
-*seed=NULL*. The default seed will tell *sampler* to use the current
-system time in milliseconds (a common seeding approach).
+The defaults for these arguments are *backups=5*, *irisData=F*,
+*seed=NULL*, and *keepOrg=T*. The default seed will tell *sampler* to
+use the current system time in milliseconds (a common seeding approach).
+The keep-original option (*keepOrg*) defaults to TRUE, but should be
+*keepOrg=F* for populations larger than about a million records since
+Excel’s row limit is 1,048,576 and *sampler* adds some header and blank
+lines to its output.
 
 To override any of these defaults, enter *name=value* as an argument.
 
@@ -57,30 +63,34 @@ process.
 
 ## Output
 
-*sampler* creates a new Excel workbook in three parts: - a copy of the
-original (source) data, - an Excel spreadsheet with the requested
-sample, and - a new tab called *Report* with key reference information:
+*sampler* creates a new Excel workbook with three parts:
 
-  - path and name of the source file
+  - a copy of the original (source) data,
 
-  - size (in rows) of the source file
+  - an Excel spreadsheet with the requested sample, and
 
-  - sample type (Simple Random Sample, Stratified Random Sample, or
-    Tabbed Stratified Sample)
-
-  - sample size
-
-  - number of strata
-
-  - number of backups requested (this number is applied to every stratum
-    in a stratified sample)
-
-  - random number seed used, for documentation and reproducibility
-
-  - date-time stamp of when the sample was generated
-
-  - stratification information (name, number in the population,
-    proportion of the population, and the number of samples)
+  - a new tab called *Report* with key reference information:
+    
+      - path and name of the source file
+    
+      - size (in rows) of the source file
+    
+      - sample type (Simple Random Sample, Stratified Random Sample, or
+        Tabbed Stratified Sample)
+    
+      - sample size
+    
+      - number of strata
+    
+      - number of backups requested (this number is applied to every
+        stratum in a stratified sample)
+    
+      - random number seed used, for documentation and reproducibility
+    
+      - date-time stamp of when the sample was generated
+    
+      - stratification information (name, number in the population,
+        proportion of the population, and the number of samples)
 
 ## Installation
 
@@ -108,6 +118,7 @@ installed on your computer:
   - tools
   - utils
   - tcltk
+  - bit64
 
 ## Examples
 

@@ -2,9 +2,9 @@
 
 export(sampler)
 export(ssize)
+import(bit64)
 import(dplyr)
 import(openxlsx)
-import(tools)
 importFrom(data.table,fread)
 importFrom(data.table,setDF)
 importFrom(data.table,setDT)
