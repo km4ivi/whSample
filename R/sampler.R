@@ -224,10 +224,11 @@ sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL,
                                         "Desired Confidence Level",
                                         "Desired Margin of Error",
                                         "Anticipated Rate of Occurrence",
+                                        "Stratified on",
                                         "Strata","Backups per Stratum",
                                         "Random Number Seed", "Created"),
                            "Value"=c(dataName, N, sampleTypeName, sampleSize,
-                                     ci, me, p,
+                                     ci, me, p, stratifyOn,
                                      numStrata, backups, rns,
                                      as.character(
                                        Sys.time()))))

@@ -78,7 +78,11 @@ process.
       - sample type (Simple Random Sample, Stratified Random Sample, or
         Tabbed Stratified Sample)
     
+      - sampling parameters
+    
       - sample size
+    
+      - stratification key
     
       - number of strata
     

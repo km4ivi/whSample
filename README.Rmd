@@ -57,7 +57,9 @@ To override any of these defaults, enter *name=value* as an argument.
   - path and name of the source file
   - size (in rows) of the source file
   - sample type (Simple Random Sample, Stratified Random Sample, or Tabbed Stratified Sample)
+  - sampling parameters
   - sample size
+  - stratification key
   - number of strata
   - number of backups requested (this number is applied to every stratum in a stratified sample)
   - random number seed used, for documentation and reproducibility
