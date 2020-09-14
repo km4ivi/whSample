@@ -107,6 +107,7 @@ The "Stratify on" menu lists all the column headers in the selected worksheet. *
     - desired confidence level
     - desired margin of error
     - anticipated rate of occurrence
+    - stratification key
     - number of strata
     - number of backups per stratum
     - random number seed used, for documentation and reproducibility
