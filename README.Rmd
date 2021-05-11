@@ -40,7 +40,7 @@ The *sampler* function calls *ssize* to get its sample size estimate. Therefore,
 - **seed** is used to seed the internal random number generator, and
 - **keepOrg** determines if a copy of the population is included in the output.
 
-The defaults for these arguments are *backups=5*, *irisData=F*, *seed=NULL*, and *keepOrg=T*. The default seed will tell *sampler* to use the current system time in milliseconds (a common seeding approach). The keep-original option (*keepOrg*) defaults to TRUE, but should be *keepOrg=F* for populations larger than about a million records since Excel's row limit is 1,048,576 and *sampler* adds some header and blank lines to its output.
+The defaults for these additional arguments are *backups=5*, *irisData=F*, *seed=NULL* and *keepOrg=F*. The default seed will tell *sampler* to use the current system time in milliseconds. Any number can be used as a seed. Whichever one is used will be listed in the *Report* output tab. The keep-original option (*keepOrg*) defaults to FALSE, but could be set to *keepOrg=T* for smaller populations that wouldn't exceed Excel's row limit is 1,048,576 rows.
 
 To override any of these defaults, enter *name=value* as an argument.
 
@@ -50,7 +50,7 @@ To override any of these defaults, enter *name=value* as an argument.
 
 *sampler* creates a new Excel workbook with three parts:
 
-- a copy of the original (source) data,
+- a copy of the original (source) data if previously requested,
 - an Excel spreadsheet with the requested sample, and
 - a new tab called *Report* with key reference information:
 
