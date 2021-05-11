@@ -30,7 +30,7 @@
 utils::globalVariables(c("prop", "."))
 
 sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL,
-                    keepOrg=T) {
+                    keepOrg=F) {
 
   hdrStyle <- createStyle(halign="center", valign="center",
                           borderColour="black", textDecoration="bold",
@@ -50,12 +50,14 @@ sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL,
 
   irisDir <- paste0(system.file("extdata", package="whSample"),
                     "/iris.xlsx")
+
   ifelse(irisData == F,
          dataName <- tk_choose.files(path.expand("~"), "Select source file",
                                      multi=FALSE, filters=Filters),
          dataName <- tk_choose.files(irisDir, "Select source file",
                                      multi=FALSE, filters=Filters)
-         )
+  )
+
   if(length(dataName) > 1){
     dataName <- paste(dataName, collapse=" ")
   }
@@ -133,6 +135,8 @@ sampler <- function(backups=5, irisData=F, ci=0.95, me=0.07, p=0.50, seed=NULL,
     setColWidths(new.wb, "Simple Random Sample", cols=1:ncol(data),
                  widths="auto")
   } else {
+
+    data  <- data %>%  slice_sample(prop=1)
 
     stratifyOn <- names(data)[utils::menu(names(data), graphics=T,
                                           title="Stratify on")]

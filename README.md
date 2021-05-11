@@ -19,11 +19,11 @@ requirements using a Normal Approximation to the Hypergeometric
 Distribution. This distribution spans the probabilities of yes/no-type
 responses without replacement. These parameters are:
 
-  - **N**, the population size.
-  - **ci**, the required confidence interval. The default is 95%.
-  - **me**, the required level of precision, or margin of error. The
+-   **N**, the population size.
+-   **ci**, the required confidence interval. The default is 95%.
+-   **me**, the required level of precision, or margin of error. The
     default is +/- 7%.
-  - **p**, the anticipated rate of occurrence. The default is 50%.
+-   **p**, the anticipated rate of occurrence. The default is 50%.
 
 *ssize(N, ci=0.95, me=0.07, p=0.50)* (showing the defaults) only
 requires the **N** argument. Used as a standalone, it can be used to
@@ -40,21 +40,21 @@ passes to *ssize*.
 
 *sampler* also takes four additional arguments:
 
-  - **irisData** opens the file chooser to a folder with example files
+-   **irisData** opens the file chooser to a folder with example files
     of Anderston’s Iris dataset of flower characteristics.
-  - **backups** provides a buffer for use if necessary to replace
+-   **backups** provides a buffer for use if necessary to replace
     samples found to be invalid for some reason,
-  - **seed** is used to seed the internal random number generator, and
-  - **keepOrg** determines if a copy of the population is included in
+-   **seed** is used to seed the internal random number generator, and
+-   **keepOrg** determines if a copy of the population is included in
     the output.
 
-The defaults for these arguments are *backups=5*, *irisData=F*,
-*seed=NULL*, and *keepOrg=T*. The default seed will tell *sampler* to
-use the current system time in milliseconds (a common seeding approach).
-The keep-original option (*keepOrg*) defaults to TRUE, but should be
-*keepOrg=F* for populations larger than about a million records since
-Excel’s row limit is 1,048,576 and *sampler* adds some header and blank
-lines to its output.
+The defaults for these additional arguments are *backups=5*,
+*irisData=F*, *seed=NULL* and *keepOrg=F*. The default seed will tell
+*sampler* to use the current system time in milliseconds. Any number can
+be used as a seed. Whichever one is used will be listed in the *Report*
+output tab. The keep-original option (*keepOrg*) defaults to FALSE, but
+could be set to *keepOrg=T* for smaller populations that wouldn’t exceed
+Excel’s row limit is 1,048,576 rows.
 
 To override any of these defaults, enter *name=value* as an argument.
 
@@ -65,35 +65,35 @@ process.
 
 *sampler* creates a new Excel workbook with three parts:
 
-  - a copy of the original (source) data,
+-   a copy of the original (source) data if previously requested,
 
-  - an Excel spreadsheet with the requested sample, and
+-   an Excel spreadsheet with the requested sample, and
 
-  - a new tab called *Report* with key reference information:
-    
-      - path and name of the source file
-    
-      - size (in rows) of the source file
-    
-      - sample type (Simple Random Sample, Stratified Random Sample, or
+-   a new tab called *Report* with key reference information:
+
+    -   path and name of the source file
+
+    -   size (in rows) of the source file
+
+    -   sample type (Simple Random Sample, Stratified Random Sample, or
         Tabbed Stratified Sample)
-    
-      - sampling parameters
-    
-      - sample size
-    
-      - stratification key
-    
-      - number of strata
-    
-      - number of backups requested (this number is applied to every
+
+    -   sampling parameters
+
+    -   sample size
+
+    -   stratification key
+
+    -   number of strata
+
+    -   number of backups requested (this number is applied to every
         stratum in a stratified sample)
-    
-      - random number seed used, for documentation and reproducibility
-    
-      - date-time stamp of when the sample was generated
-    
-      - stratification information (name, number in the population,
+
+    -   random number seed used, for documentation and reproducibility
+
+    -   date-time stamp of when the sample was generated
+
+    -   stratification information (name, number in the population,
         proportion of the population, and the number of samples)
 
 ## Installation
@@ -116,13 +116,13 @@ devtools::install_github("km4ivi/whSample")
 you’re running a developmental version, make sure these packages are
 installed on your computer:
 
-  - tidyverse (or individually: magrittr, dplyr, purrr)
-  - openxlsx
-  - data.table
-  - tools
-  - utils
-  - tcltk
-  - bit64
+-   tidyverse (or individually: magrittr, dplyr, purrr)
+-   openxlsx
+-   data.table
+-   tools
+-   utils
+-   tcltk
+-   bit64
 
 ## Examples
 
